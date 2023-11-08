@@ -10,16 +10,13 @@ class ViewPage extends StatefulWidget {
 }
 
 class _ViewPageState extends State<ViewPage> {
-  TextEditingController emailEditingController = TextEditingController();
   bool emailIsValid = false;
-
-  late EmailModel emailModel;
+  EmailModel emailModel = EmailModel();
   late EmailController emailController;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
-    emailModel = EmailModel(email: "");
     emailController = EmailController(emailModel: emailModel);
   }
 
@@ -81,12 +78,11 @@ class _ViewPageState extends State<ViewPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextBox(
-              controller: emailEditingController,
+              controller: emailModel.emailController,
               highlightColor: emailIsValid ? null : Colors.red,
               placeholder: "Bitte gebe die E-Mail ein",
               onSubmitted: emailIsValid ? (_) => saveEmail(context) : null,
               onChanged: (value) {
-                emailModel.email = value;
                 setState(() {
                   emailIsValid = emailModel.isEmailValid();
                 });

@@ -1,22 +1,19 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 
 class EmailModel {
-  String _email;
+  TextEditingController _emailController = TextEditingController();
 
-  EmailModel({
-    required String email,
-  }) : _email = email;
+  TextEditingController get emailController => _emailController;
 
-  String get email => _email;
-
-  set email(String email) {
-    _email = email;
+  set emailController(TextEditingController emailController) {
+    _emailController = emailController;
   }
 
   bool isEmailValid() {
-    return EmailValidator.validate(_email);
+    return EmailValidator.validate(_emailController.text);
   }
 
   Future<String?> readEmailText() async {
@@ -41,7 +38,8 @@ class EmailModel {
       }
       final String? emails = await readEmailText();
       final File file = File('${directory.path}/emails.txt');
-      await file.writeAsString(emails != null ? '$emails\n$email' : _email);
+      await file.writeAsString(emails != null ? '$emails\n${_emailController.text}' : _emailController.text);
+      _emailController.text = "";
       return true;
     } catch (e) {
       return false;
