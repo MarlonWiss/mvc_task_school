@@ -19,18 +19,30 @@ class EmailModel {
     return EmailValidator.validate(_email);
   }
 
+  Future<String?> readEmailText() async {
+    try {
+      final Directory? directory = await getDownloadsDirectory();
+      if (directory == null) {
+        return null;
+      }
+      final File file = File('${directory.path}/emails.txt');
+      return await file.readAsString();
+    } catch (e) {
+      return null;
+    }
+  }
+
   // email was saved or not
   Future<bool> saveEmailAsTxt() async {
     try {
       final Directory? directory = await getDownloadsDirectory();
-      if (directory != null) {
-        final File file = File(
-          '${directory.path}/$_email.txt',
-        );
-        await file.writeAsString(_email);
-        return true;
+      if (directory == null) {
+        return false;
       }
-      return false;
+      final String? emails = await readEmailText();
+      final File file = File('${directory.path}/emails.txt');
+      await file.writeAsString(emails != null ? '$emails\n$email' : _email);
+      return true;
     } catch (e) {
       return false;
     }

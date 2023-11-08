@@ -12,7 +12,7 @@ class ViewPage extends StatefulWidget {
 class _ViewPageState extends State<ViewPage> {
   TextEditingController emailEditingController = TextEditingController();
   bool emailIsValid = false;
-  
+
   late EmailModel emailModel;
   late EmailController emailController;
 
@@ -32,10 +32,11 @@ class _ViewPageState extends State<ViewPage> {
           content: const Text("Die E-Mail wurde erfolgreich gespeichert"),
           actions: [
             FilledButton(
-                onPressed:  () {
-                        Navigator.of(context).pop();
-                      }, child: const Text("OK"),),
-          
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            ),
           ],
         );
       },
@@ -51,14 +52,24 @@ class _ViewPageState extends State<ViewPage> {
           content: const Text("Die E-Mail konnte nicht gespeichert werden"),
           actions: [
             FilledButton(
-                onPressed:  () {
-                        Navigator.of(context).pop();
-                      }, child: const Text("OK"),),
-          
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            ),
           ],
         );
       },
     );
+  }
+
+  Future<void> saveEmail(BuildContext context) async {
+    final bool saved = await emailController.saveEmail();
+    if (saved) {
+      showMessage(context);
+    } else {
+      showError(context);
+    }
   }
 
   @override
@@ -73,6 +84,7 @@ class _ViewPageState extends State<ViewPage> {
               controller: emailEditingController,
               highlightColor: emailIsValid ? null : Colors.red,
               placeholder: "Bitte gebe die E-Mail ein",
+              onSubmitted: emailIsValid ? (_) => saveEmail(context) : null,
               onChanged: (value) {
                 emailModel.email = value;
                 setState(() {
@@ -83,16 +95,7 @@ class _ViewPageState extends State<ViewPage> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: emailIsValid
-                    ? () async {
-                        final bool saved = await emailController.saveEmail();
-                        if(saved) {
-                          showMessage(context);
-                        } else {
-                          showError(context);
-                        }
-                      }
-                    : null,
+                onPressed: emailIsValid ? () => saveEmail(context) : null,
                 child: const Text("Speichern"),
               ),
             ),
