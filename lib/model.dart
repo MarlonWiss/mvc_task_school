@@ -14,7 +14,9 @@ class EmailModel {
     required ValueNotifier<String> emails,
   })  : _email = email,
         _isEmailValid = isEmailValid,
-        _emails = emails;
+        _emails = emails {
+    readEmailText();
+  }
 
   ValueNotifier<String> get email => _email;
   ValueNotifier<String> get emails => _emails;
@@ -63,7 +65,9 @@ class EmailModel {
 
       // save txt
       final File file = File('${directory.path}/emails.txt');
-      await file.writeAsString('$newEmails\n${email.value}');
+      await file.writeAsString(
+        newEmails != null ? '$newEmails\n${email.value}' : email.value,
+      );
       email.value = "";
 
       // set the emails text to show new emails
