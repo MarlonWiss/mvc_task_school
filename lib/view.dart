@@ -10,14 +10,27 @@ class ViewPage extends StatefulWidget {
 }
 
 class _ViewPageState extends State<ViewPage> {
-  bool emailIsValid = false;
-  EmailModel emailModel = EmailModel();
+  late EmailModel emailModel;
   late EmailController emailController;
+  TextEditingController emailTextController = TextEditingController();
 
   @override
   initState() {
     super.initState();
+    emailModel = EmailModel(
+      email: ValueNotifier(""),
+      emails: ValueNotifier(""),
+      isEmailValid: ValueNotifier(false),
+    );
     emailController = EmailController(emailModel: emailModel);
+  }
+
+  @override
+  void dispose() {
+    emailModel.email.dispose();
+    emailModel.isEmailValid.dispose();
+    emailModel.emails.dispose();
+    super.dispose();
   }
 
   void showMessage(BuildContext context) {
@@ -63,6 +76,7 @@ class _ViewPageState extends State<ViewPage> {
   Future<void> saveEmail(BuildContext context) async {
     final bool saved = await emailController.saveEmail();
     if (saved) {
+      emailTextController.text = "";
       showMessage(context);
     } else {
       showError(context);
@@ -75,26 +89,50 @@ class _ViewPageState extends State<ViewPage> {
       content: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            TextBox(
-              controller: emailModel.emailController,
-              highlightColor: emailIsValid ? null : Colors.red,
-              placeholder: "Bitte gebe die E-Mail ein",
-              onSubmitted: emailIsValid ? (_) => saveEmail(context) : null,
-              onChanged: (value) {
-                setState(() {
-                  emailIsValid = emailModel.isEmailValid();
-                });
-              },
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: emailIsValid ? () => saveEmail(context) : null,
-                child: const Text("Speichern"),
+            ValueListenableBuilder(
+              valueListenable: emailModel.isEmailValid,
+              builder: (context, value, child) => TextBox(
+                controller: emailTextController,
+                highlightColor: value ? null : Colors.red,
+                placeholder: "Bitte gebe die E-Mail ein",
+                onSubmitted: value ? (_) => saveEmail(context) : null,
+                onChanged: (value) {
+                  emailModel.email = ValueNotifier(value);
+                },
               ),
             ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: ValueListenableBuilder(
+                        valueListenable: emailModel.emails,
+                        builder: (context, value, child) => Text(value),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            ValueListenableBuilder(
+              valueListenable: emailModel.isEmailValid,
+              builder: (context, value, child) => SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: value
+                      ? () async {
+                          await saveEmail(context);
+                        }
+                      : null,
+                  child: const Text("Speichern"),
+                ),
+              ),
+            )
           ],
         ),
       ),

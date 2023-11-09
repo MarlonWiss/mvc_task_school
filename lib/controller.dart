@@ -9,6 +9,6 @@ class EmailController {
 
   // email was saved or not
   Future<bool> saveEmail() async {
-    return await _emailModel.saveEmailAsTxt();
+    return await _emailModel.saveEmailAsTxtAndSetText();
   }
 }
